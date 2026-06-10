@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Popular Cities</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+  <div class="container mx-auto py-8">
+    <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Popular Cities</h1>
+
+    <div id="popular-cities" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <!-- Popular cities will be injected here -->
+    </div>
+  </div>
+
+  <script>
+    const popularContainer = document.getElementById('popular-cities');
+
+    fetch('/static/cities_with_categories.json')
+      .then(res => res.json())
+      .then(data => {
+        // Sort by Ratings, pick top 20
+        const topCities = data
+          .filter(city => city.Image_URL) // Must have image
+          .sort((a, b) => b.Ratings - a.Ratings)
+          .slice(0, 20);
+
+        const cards = topCities.map(city => `
+          <div class="bg-white rounded-xl shadow p-4">
+            <img src="${city.Image_URL}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800&q=80';" alt="${city.City}" class="w-full h-48 object-cover rounded-md mb-3">
+            <h2 class="text-xl font-semibold text-gray-800">${city.City}</h2>
+            <p class="text-sm text-gray-600 mb-1">Rating: ${city.Ratings} | Duration: ${city.Ideal_duration}</p>
+            <p class="text-gray-700 text-sm">${city.City_desc.slice(0, 100)}...</p>
+          </div>
+        `);
+
+        popularContainer.innerHTML = cards.join('');
+      })
+      .catch(err => console.error('Failed to load city data:', err));
+  </script>
+</body>
+</html>
